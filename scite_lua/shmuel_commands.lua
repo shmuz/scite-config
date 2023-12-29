@@ -1,24 +1,27 @@
 -- Started 2008-11-06 by Shmuel Zeigerman
--- luacheck: globals smz_SortLines smz_InsertGUID smz_InsertDate smz_StripTest
+-- luacheck: globals smz_SortLines smz_InsertGUID smz_InsertDate smz_StripTest smz_Compile
+
+local IDM_SAVE          = 106
 
 extman.Command {
 --{"Sort Lines",    "smz_SortLines",  "Ctrl+M"},
 --{"Insert GUID",   "smz_InsertGUID", "Ctrl+F11"},
   {"Insert Date",   "smz_InsertDate", "Ctrl+Shift+T"},
   {"Strip example", "smz_StripTest",  "Ctrl+F10"},
+  {"Compile CPP-file", "smz_Compile", "Alt+F9"},
 }
 --------------------------------------------------------------------------------
 
-function smz_SortLines()
-  require("scite.sortlines")()
-end
+-- function smz_SortLines()
+--   require("scite.sortlines")()
+-- end
 --------------------------------------------------------------------------------
 
-function smz_InsertGUID()
-  local su = require "sysutils"
-  local str = '"' .. su.Uuid(su.Uuid()):upper() .. '"'
-  editor:AddText(str)
-end
+-- function smz_InsertGUID()
+--   local su = require "sysutils"
+--   local str = '"' .. su.Uuid(su.Uuid()):upper() .. '"'
+--   editor:AddText(str)
+-- end
 --------------------------------------------------------------------------------
 
 function smz_InsertDate()
@@ -75,5 +78,43 @@ function smz_StripTest()
         end
       end;
     }
+end
+--------------------------------------------------------------------------------
+
+function smz_Compile()
+  if props.FileExt ~= "cpp" then
+    print("Not a CPP file"); return
+  end
+
+  if nil == props.FilePath:match("/far2m/far/src/") then
+    print("OUTSIDE THE WORK TREE"); return
+  end
+
+  local incl = {
+    "far2sdk", "src", "src/base", "src/mix", "src/bookmarks", "src/cfg", "src/console",
+    "src/filemask", "src/hist", "src/locale", "src/macro", "src/panels", "src/plug", "src/vt",
+    "../WinPort", "../utils/include", "../_build/far" }
+  for k,v in ipairs(incl) do incl[k] = "-I"..v; end
+  incl = table.concat(incl, " ")
+
+  local dir_start = "~/far2m/far"
+  local flags = "-std=c++11 -Wall -fPIC -Wno-unused-function -D_FILE_OFFSET_BITS=64"
+  local command = ("cd %s && g++ %s %s -c %s -o /tmp/tmp.o 2>&1"):format(
+    dir_start, incl, flags, props.FilePath:match("src/.+"))
+
+  scite.MenuCommand(IDM_SAVE)
+  print(">"..command)
+  local fp, msg = io.popen(command)
+  if fp then
+    local curpos = output.CurrentPos
+    for ln in fp:lines() do print(ln) end
+    if fp:close() then
+      print("SUCCESS")
+    else
+      output:GotoPos(curpos)
+    end
+  else
+    print(msg)
+  end
 end
 --------------------------------------------------------------------------------
