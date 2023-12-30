@@ -1,14 +1,12 @@
 -- Started 2008-11-06 by Shmuel Zeigerman
 -- luacheck: globals smz_SortLines smz_InsertGUID smz_InsertDate smz_StripTest smz_Compile
 
-local IDM_SAVE          = 106
-
 extman.Command {
 --{"Sort Lines",    "smz_SortLines",  "Ctrl+M"},
 --{"Insert GUID",   "smz_InsertGUID", "Ctrl+F11"},
   {"Insert Date",   "smz_InsertDate", "Ctrl+Shift+T"},
   {"Strip example", "smz_StripTest",  "Ctrl+F10"},
-  {"Compile CPP-file", "smz_Compile", "Alt+F9"},
+  {"Compile CPP-file", "smz_Compile", "*.cpp{savebefore:yes}", "Alt+F9"},
 }
 --------------------------------------------------------------------------------
 
@@ -82,10 +80,6 @@ end
 --------------------------------------------------------------------------------
 
 function smz_Compile()
-  if props.FileExt ~= "cpp" then
-    print("Not a CPP file"); return
-  end
-
   if nil == props.FilePath:match("/far2m/far/src/") then
     print("OUTSIDE THE WORK TREE"); return
   end
@@ -99,10 +93,9 @@ function smz_Compile()
 
   local dir_start = "~/far2m/far"
   local flags = "-std=c++11 -Wall -fPIC -Wno-unused-function -D_FILE_OFFSET_BITS=64"
-  local command = ("cd %s && g++ %s %s -c %s -o /tmp/tmp.o 2>&1"):format(
+  local command = ("cd %s && g++ %s %s -c %s -o /tmp/far2m_tmp.o 2>&1"):format(
     dir_start, incl, flags, props.FilePath:match("src/.+"))
 
-  scite.MenuCommand(IDM_SAVE)
   print(">"..command)
   local fp, msg = io.popen(command)
   if fp then
