@@ -2,7 +2,7 @@
 -- luacheck: globals smz_SortLines smz_InsertGUID smz_InsertDate smz_StripTest smz_Compile
 
 extman.Command {
---{"Sort Lines",    "smz_SortLines",  "Ctrl+M"},
+  {"Sort Lines",    "smz_SortLines",  "Ctrl+M"},
 --{"Insert GUID",   "smz_InsertGUID", "Ctrl+F11"},
   {"Insert Date",   "smz_InsertDate", "Ctrl+Shift+T"},
   {"Strip example", "smz_StripTest",  "Ctrl+F10"},
