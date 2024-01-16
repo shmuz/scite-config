@@ -199,12 +199,7 @@ local function SortWithRawData (aData, columntype)
   PutLines(lines)
 end
 
--- generic
-local function SortWithDialog (data)
-  local columntype = IsColumnType()
-  SortWithRawData (data, columntype)
-end
-
+-- Keep it as an upvalue to preserve data during a SciTE session
 local DialogData = {
   cbxUse1=true;  edtExpr1="a"; cbxCase1=false;  cbxRev1=false;
   cbxUse2=false; edtExpr2="";  cbxCase2=false;  cbxRev2=false;
@@ -216,32 +211,36 @@ local DialogData = {
 }
 
 function smz_SortLines()
-  if false and editor.SelectionStart == editor.SelectionEnd then
-    scite.StripShow("")
-    return
-  end
-
-  -- create a strip
+  -- Create a strip
   local Strip = {
-    "!",
-    "'Expression:'", "[]", "(&Direct Sort)", -- 0,1,2
+    "'Expression:'",     "[]", "(&Direct Sort)",  -- 0,1,2
     "\n",
-    "'Column Pattern:'", "[]", "(&Reverse Sort)" -- 3,4,5
+    "'Column Pattern:'", "[]", "(&Reverse Sort)", -- 3,4,5
+    "\n",
+    "'Only selected:'",  "{}", "(&Cancel)",       -- 6,7,8
   }
-  local edtExpr1, btnDirect = 1,2
-  local edtColPat, btnReverse = 4,5
+  local edtExpr1,   btnDirect  = 1,2
+  local edtColPat,  btnReverse = 4,5
+  local cbxOnlySel, btnCancel  = 7,8
 
   scite.StripShow(table.concat(Strip))
   scite.StripSet(edtExpr1, DialogData.edtExpr1)
   scite.StripSet(edtColPat, DialogData.edtColPat)
+  scite.StripSetList(cbxOnlySel, "No\nYes")
+  scite.StripSet(cbxOnlySel, DialogData.cbxOnlySel and "Yes" or "No")
 
   extman.SetStripHandler {
-    action = function(control, change, data)
-      if change == "clicked" then
-        DialogData.edtExpr1  = scite.StripValue(edtExpr1)
-        DialogData.edtColPat = scite.StripValue(edtColPat)
-        DialogData.cbxRev1   = (control == btnReverse)
-        SortWithDialog(DialogData)
+    action = function(control, msg, data)
+      if msg == "clicked" then
+        if control == btnCancel then
+          scite.StripShow("")
+        else
+          DialogData.edtExpr1   = scite.StripValue(edtExpr1)
+          DialogData.edtColPat  = scite.StripValue(edtColPat)
+          DialogData.cbxRev1    = (control == btnReverse)
+          DialogData.cbxOnlySel = (scite.StripValue(cbxOnlySel) == "Yes")
+          SortWithRawData (DialogData, IsColumnType())
+        end
       end
     end;
   }
