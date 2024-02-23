@@ -16,11 +16,11 @@ local unpack = unpack or table.unpack
 extman = {}
 
 -- this is an opportunity for you to make regular Lua packages available to SciTE
-do
+--do
 --  local p = "s:/progr/work/lua_share"
 --  package.path = ("%s/?.lua;%s/?/?.lua;%s/?/init.lua"):format(p,p,p)
 --  package.cpath = "s:/progr/exe/lib32/lua/5.1/?.dll"
-end
+--end
 
 -- local lfs = require "lfs"
 
@@ -32,7 +32,7 @@ end
 
 function extman.GetPropBool(key,default)
   local res = extman.GetProp(key,default)
-  return not (not res or res == '0' or res == 'false')
+  return res and res ~= '0' and res ~= 'false'
 end
 
 local GTK = extman.GetProp('PLAT_GTK')
@@ -60,18 +60,18 @@ local gsub   = string.gsub
 
 -- file must be quoted if it contains spaces!
 function extman.quote_if_needed(target)
-    local quote = '"'
-    if find(target,'%s') and sub(target,1,1) ~= quote then
-        target = quote..target..quote
-    end
-    return target
+  local quote = '"'
+  if find(target,'%s') and sub(target,1,1) ~= quote then
+    target = quote..target..quote
+  end
+  return target
 end
 
 function OnUserListSelection(tp,str)
   if _UserListSelection then
-     local callback = _UserListSelection
-     _UserListSelection = nil
-     return callback(str)
+    local callback = _UserListSelection
+    _UserListSelection = nil
+    return callback(str)
   end
   return false
 end
@@ -147,15 +147,15 @@ end
 
 -- new with 1.74
 function OnKey(key,shift,ctrl,alt)
-    return Dispatch(_Key,key,shift,ctrl,alt)
+  return Dispatch(_Key,key,shift,ctrl,alt)
 end
 
 function OnDwellStart(pos,s)
-    return Dispatch(_DwellStart,pos,s)
+  return Dispatch(_DwellStart,pos,s)
 end
 
 function OnClose()
-    return Dispatch(_Close)
+  return Dispatch(_Close)
 end
 
 -- may optionally ask that this handler be immediately
@@ -223,22 +223,22 @@ end
 
 --new 1.74
 function extman.OnKey(fn,param)
-    append_unique(_Key,fn,param)
+  append_unique(_Key,fn,param)
 end
 
 function extman.OnDwellStart(fn,param)
-    append_unique(_DwellStart,fn,param)
+  append_unique(_DwellStart,fn,param)
 end
 
 function extman.OnClose(fn,param)
-    append_unique(_Close,fn,param)
+  append_unique(_Close,fn,param)
 end
 
 local function buffer_switch(filename)
 --- OnOpen() is also called if we move to a new folder
-   if not find(filename,'[\\/]$') then
-      Dispatch(_OpenSwitch,filename)
-   end
+  if not find(filename,'[\\/]$') then
+    Dispatch(_OpenSwitch,filename)
+  end
 end
 
 extman.OnOpen(buffer_switch)
@@ -298,41 +298,41 @@ end
 function extman.OnWord(fn,param)
   append_unique(_Word,fn,param)
   if not param then
-     extman.OnChar(on_word_char)
+    extman.OnChar(on_word_char)
   else
-     extman.OnChar(on_word_char,'remove')
+    extman.OnChar(on_word_char,'remove')
   end
 end
 
 local function get_line(pane,lineno)
-    if not pane then pane = editor end
-    if not lineno then
-        local line_pos = pane.CurrentPos
-        lineno = pane:LineFromPosition(line_pos)-1
-    end
-    -- strip linefeeds (Windows is a special case as usual!)
-    local endl = 2
-    if pane.EOLMode == 0 then endl = 3 end
-    local line = pane:GetLine(lineno)
-    if not line then return nil end
-    return string.sub(line,1,-endl)
+  pane = pane or editor
+  if not lineno then
+    local line_pos = pane.CurrentPos
+    lineno = pane:LineFromPosition(line_pos)-1
+  end
+  -- strip linefeeds (Windows is a special case as usual!)
+  local endl = 2
+  if pane.EOLMode == 0 then endl = 3 end
+  local line = pane:GetLine(lineno)
+  if not line then return nil end
+  return string.sub(line,1,-endl)
 end
 
 -- export this useful function...
 extman.Line = get_line
 
 local function on_line_char(ch,was_output)
-    if ch == '\n' then
-        local in_editor = editor.Focus
-        if in_editor and not was_output then
-            Dispatch(_LineEd,get_line(editor))
-            return false -- DO NOT interfere with any editor processing!
-        elseif not in_editor and was_output then
-            Dispatch(_LineOut,get_line(output))
-            return true -- prevent SciTE from trying to evaluate the line
-        end
+  if ch == '\n' then
+    local in_editor = editor.Focus
+    if in_editor and not was_output then
+      Dispatch(_LineEd,get_line(editor))
+      return false -- DO NOT interfere with any editor processing!
+    elseif not in_editor and was_output then
+      Dispatch(_LineOut,get_line(output))
+      return true -- prevent SciTE from trying to evaluate the line
     end
-    return false
+  end
+  return false
 end
 
 local function on_line_editor_char(ch)
@@ -346,9 +346,9 @@ end
 local function set_line_handler(fn,rem,handler,on_char)
   append_unique(handler,fn,rem)
   if not rem then
-     extman.OnChar(on_char)
+    extman.OnChar(on_char)
   else
-     extman.OnChar(on_char,'remove')
+    extman.OnChar(on_char,'remove')
   end
 end
 
@@ -366,24 +366,24 @@ local tempfile
 local dirsep
 
 if GTK then
-    tempfile = '/tmp/.scite-temp-files'
-    path_pattern = '(.*)/[^%./]+%.%w+$'
-    dirsep = '/'
+  tempfile = '/tmp/.scite-temp-files'
+  path_pattern = '(.*)/[^%./]+%.%w+$'
+  dirsep = '/'
 else
-    tempfile = '\\scite_temp1'
-    path_pattern = '(.*)\\[^%.\\]+%.%w+$'
-    dirsep = '\\'
+  tempfile = '\\scite_temp1'
+  path_pattern = '(.*)\\[^%.\\]+%.%w+$'
+  dirsep = '\\'
 end
 
 local function path_of(s)
-    return match(s,path_pattern) or s
+  return match(s,path_pattern) or s
 end
 
 local extman_path = path_of(props['ext.lua.startup.script'])
 local lua_path = extman.GetProp('ext.lua.directory',extman_path..dirsep..'scite_lua')
 
 function extman.Path()
-    return extman_path
+  return extman_path
 end
 
 -- this version of scite-gdb uses the new spawner extension library.
@@ -392,101 +392,101 @@ if false then -- do
   -- by default, the spawner lib sits next to extman.lua
   local spawner_path = extman.GetProp('spawner.extension.path',extman_path)
   if GTK then
-      fn,err = package.loadlib(spawner_path..'/unix-spawner-ex.so','luaopen_spawner')
+    fn,err = package.loadlib(spawner_path..'/unix-spawner-ex.so','luaopen_spawner')
   else
-      fn,err = package.loadlib(spawner_path..'\\spawner-ex.dll','luaopen_spawner')
+    fn,err = package.loadlib(spawner_path..'\\spawner-ex.dll','luaopen_spawner')
   end
   if fn then
-      if GTK then fn() -- register spawner
-      else spawner = fn()
-      end
+    if GTK then fn() -- register spawner
+    else spawner = fn()
+    end
   else
-      print('cannot load spawner '..err)
+    print('cannot load spawner '..err)
   end
 end
 
 -- a general popen function that uses the spawner library if found; otherwise falls back
 -- on os.execute
 function extman.Popen(cmd)
-    if spawner then
-        return spawner.popen(cmd)
+  if spawner then
+    return spawner.popen(cmd)
+  else
+    cmd = cmd..' > '..tempfile
+    if GTK then -- io.popen is dodgy; don't use it!
+      os.execute(cmd)
     else
-        cmd = cmd..' > '..tempfile
-        if  GTK then -- io.popen is dodgy; don't use it!
-            os.execute(cmd)
-        else
-            if Execute then -- scite_other was found!
-                Execute(cmd)
-            else
-                os.execute(cmd)
-            end
-       end
-       return io.open(tempfile)
+      if Execute then -- scite_other was found!
+        Execute(cmd)
+      else
+        os.execute(cmd)
+      end
     end
+    return io.open(tempfile)
+  end
 end
 
 local function dirmask(mask,isdir)
-    if not GTK then
-        local attrib = isdir and ' /A:D ' or ''
-        mask = gsub(mask,'/','\\')
-        return 'dir /b '..attrib..extman.quote_if_needed(mask)
-    else
-        local attrib = isdir and ' -F ' or ''
-        return 'ls -1 '..attrib..extman.quote_if_needed(mask)
-    end
+  if not GTK then
+    local attrib = isdir and ' /A:D ' or ''
+    mask = gsub(mask,'/','\\')
+    return 'dir /b '..attrib..extman.quote_if_needed(mask)
+  else
+    local attrib = isdir and ' -F ' or ''
+    return 'ls -1 '..attrib..extman.quote_if_needed(mask)
+  end
 end
 
 -- grab all files matching @mask, which is assumed to be a path with a wildcard.
 function extman.Files(mask)
-    local path,cmd
-    if not GTK then
-        cmd = dirmask(mask)
-        path = mask:match('(.*\\)')  or '.\\'
-    else
-        cmd = 'ls -1 '..mask
-        path = ''
+  local path,cmd
+  if not GTK then
+    cmd = dirmask(mask)
+    path = mask:match('(.*\\)')  or '.\\'
+  else
+    cmd = 'ls -1 '..mask
+    path = ''
+  end
+  local files = {}
+  local f = extman.Popen(cmd)
+  if f then
+    for line in f:lines() do
+      -- print(path..line)
+      append(files,path..line)
     end
-    local files = {}
-    local f = extman.Popen(cmd)
-    if f then
-        for line in f:lines() do
-         -- print(path..line)
-            append(files,path..line)
-        end
-        f:close()
-    end
-    return files
+    f:close()
+  end
+  return files
 end
 
 -- grab all directories in @path, excluding anything that matches @exclude_pat
 -- As a special exception, will also any directory called 'examples' ;)
 function extman.Directories(path,exclude_pat)
-    local cmd
-    --print(path)
-    if not GTK then
-        cmd = dirmask(path..'\\*.',true)
-    else
-        cmd = dirmask(path,true)
+  local cmd
+  --print(path)
+  if not GTK then
+    cmd = dirmask(path..'\\*.',true)
+  else
+    cmd = dirmask(path,true)
+  end
+  path = path..dirsep
+  local f = extman.Popen(cmd)
+  local files = {}
+  if not f then return files end
+  for line in f:lines() do
+--  print(line)
+    if GTK then
+      if line:sub(-1,-1) == dirsep then
+        line = line:sub(1,-2)
+      else
+        line = nil
+      end
     end
-    path = path..dirsep
-    local f = extman.Popen(cmd)
-    local files = {}
-    if not f then return files end
-    for line in f:lines() do
---        print(line)
-        if GTK then
-            if line:sub(-1,-1) == dirsep then
-                line = line:sub(1,-2)
-            else
-                line = nil
-            end
-        end
-        if line and not line:find(exclude_pat) and line:lower() ~= 'examples' then
-            append(files,path..line)
-        end
+    if line and not line:find(exclude_pat) and line:lower() ~= 'examples' then
+      append(files,path..line)
     end
-    f:close()
-    return files
+  end
+  f:close()
+  return files
 end
 
 function extman.FileExists(f)
@@ -499,27 +499,27 @@ function extman.FileExists(f)
 end
 
 function extman.CurrentFile()
-    return props['FilePath']
+  return props['FilePath']
 end
 
 function extman.DirectoryExists(path)
-    if GTK then
-        return os.execute('test -d "'..path..'"') == true
-    else
-     -- os.execute('if not exist "'..path..'"\\ exit 1') == 0 --> bad: SciTE window loses focus on launching
-        local lfs = require "lfs"
-        return lfs.attributes(path,"mode") == "directory"
-    end
+  if GTK then
+    return os.execute('test -d "'..path..'"') == true
+  else
+    -- os.execute('if not exist "'..path..'"\\ exit 1') == 0 --> bad: SciTE window loses focus on launching
+    local lfs = require "lfs"
+    return lfs.attributes(path,"mode") == "directory"
+  end
 end
 
 function extman.split(s,delim)
-    local res = {}
-    for w in (s..delim):gmatch("(.-)%"..delim) do append(res,w) end
-    return res
+  local res = {}
+  for w in (s..delim):gmatch("(.-)%"..delim) do append(res,w) end
+  return res
 end
 
 function extman.splitv(s,delim)
-    return unpack(extman.split(s,delim))
+  return unpack(extman.split(s,delim))
 end
 
 local command_number = 20
@@ -532,57 +532,58 @@ local name_id_map = {}
 -- @cmd  : 'smart_paste' : 'do_run'             : '*dofile $(FilePath)'
 -- @mode : '.*'          : '.*{savebefore:yes}' : '.*'
 local function set_command(name,cmd,mode)
---print(name,cmd,mode)
-     local pattern,md = match(mode,'(.+){(.+)}')
-     if not pattern then
-        pattern = mode
-        md = 'savebefore:no'
-     end
-     local which = '.'..command_number..pattern
-     props['command.name'..which] = name
-     props['command'..which] = cmd
-     props['command.subsystem'..which] = '3'
-     props['command.mode'..which] = md
-     name_id_map[name] = IDM_TOOLS + command_number
-     return which
+  --print(name,cmd,mode)
+  local pattern,md = match(mode,'(.+){(.+)}')
+  if not pattern then
+    pattern = mode
+    md = 'savebefore:no'
+  end
+  local which = '.'..command_number..pattern
+  props['command.name'..which] = name
+  props['command'..which] = cmd
+  props['command.subsystem'..which] = '3'
+  props['command.mode'..which] = md
+  name_id_map[name] = IDM_TOOLS + command_number
+  return which
 end
 
 local function check_gtk_alt_shortcut(shortcut,name)
-   -- Alt+<letter> shortcuts don't work for GTK, so handle them directly...
-   local letter = shortcut:match('^Alt%+([A-Z])$')
-   if letter then
-        alt_letter_map[letter:lower()] = name
-        if not alt_letter_map_init then
-            alt_letter_map_init = true
-            extman.OnKey(function(key,shift,ctrl,alt)
-                if alt and key < 255 then
-                    local ch = string.char(key)
-                    if alt_letter_map[ch] then
-                        extman.MenuCommand(alt_letter_map[ch])
-                    end
-                end
-            end)
-        end
+  -- Alt+<letter> shortcuts don't work for GTK, so handle them directly...
+  local letter = shortcut:match('^Alt%+([A-Z])$')
+  if letter then
+    alt_letter_map[letter:lower()] = name
+    if not alt_letter_map_init then
+      alt_letter_map_init = true
+      extman.OnKey(
+        function(key,shift,ctrl,alt)
+          if alt and key < 255 then
+            local ch = string.char(key)
+            if alt_letter_map[ch] then
+              extman.MenuCommand(alt_letter_map[ch])
+            end
+          end
+        end)
     end
+  end
 end
 
 local function set_shortcut(shortcut,name,which)
-    if shortcut == 'Context' then
-        local usr = 'user.context.menu'
-        if props[usr] == '' then -- force a separator
-            props[usr] = '|'
-        end
-        props[usr] = props[usr]..'|'..name..'|'..(IDM_TOOLS+command_number)..'|'
+  if shortcut == 'Context' then
+    local usr = 'user.context.menu'
+    if props[usr] == '' then -- force a separator
+      props[usr] = '|'
+    end
+    props[usr] = props[usr]..'|'..name..'|'..(IDM_TOOLS+command_number)..'|'
+  else
+    local cmd = shortcuts_used[shortcut]
+    if cmd then
+      print('Error: shortcut already used in "'..cmd..'"')
     else
-       local cmd = shortcuts_used[shortcut]
-       if cmd then
-            print('Error: shortcut already used in "'..cmd..'"')
-       else
-           shortcuts_used[shortcut] = name
-           if GTK then check_gtk_alt_shortcut(shortcut,name) end
-           props['command.shortcut'..which] = shortcut
-       end
-     end
+      shortcuts_used[shortcut] = name
+      if GTK then check_gtk_alt_shortcut(shortcut,name) end
+      props['command.shortcut'..which] = shortcut
+    end
+  end
 end
 
 -- allows you to bind given Lua functions to shortcut keys
@@ -599,7 +600,7 @@ end
 -- to the right-hand click context menu.
 function extman.Command(list)
   if type(list) == 'string' then
-     list = {list}
+    list = {list}
   end
   for _,v in ipairs(list) do
     local name,cmd,mode,shortcut
@@ -625,8 +626,8 @@ end
 -- use this to launch Lua Tool menu commands directly by name
 -- (commands are not guaranteed to work properly if you just call the Lua function)
 function extman.MenuCommand(cmd)
-    cmd = name_id_map[cmd]
-    if cmd then scite.MenuCommand(cmd) end
+  cmd = name_id_map[cmd]
+  if cmd then scite.MenuCommand(cmd) end
 end
 
 local loaded = {}
@@ -634,46 +635,46 @@ local current_filepath
 
 -- this will quietly fail....
 local function silent_dofile(f)
-    if extman.FileExists(f) then
-        if not loaded[f] then
-            dofile(f)
-            loaded[f] = true
-        end
-        return true
+  if extman.FileExists(f) then
+    if not loaded[f] then
+      dofile(f)
+      loaded[f] = true
     end
-    return false
+    return true
+  end
+  return false
 end
 
 function extman.dofile(f)
-    f = extman_path..dirsep..f
-    silent_dofile(f)
+  f = extman_path..dirsep..f
+  silent_dofile(f)
 end
 
 function extman.require(f)
-    local path = lua_path..dirsep..f
-    if not silent_dofile(path) then
-        silent_dofile(current_filepath..dirsep..f)
-    end
+  local path = lua_path..dirsep..f
+  if not silent_dofile(path) then
+    silent_dofile(current_filepath..dirsep..f)
+  end
 end
 
 if not GTK then
-    extman.dofile 'scite_other.lua'
+  extman.dofile 'scite_other.lua'
 end
 
 if not extman.DirectoryExists(lua_path) then
-    print('Error: directory '..lua_path..' not found')
-    return
+  print('Error: directory '..lua_path..' not found')
+  return
 end
 
 local function load_script_list(script_list,path)
-    if not script_list then
-      print('Error: no files found in '..path)
-    else
-      current_filepath = path
-      for _,file in pairs(script_list) do
-        silent_dofile(file)
-      end
+  if not script_list then
+    print('Error: no files found in '..path)
+  else
+    current_filepath = path
+    for _,file in pairs(script_list) do
+      silent_dofile(file)
     end
+  end
 end
 
 -- Load all scripts in the lua_path (usually 'scite_lua'), including within any subdirectories
@@ -682,25 +683,25 @@ local script_list = extman.Files(lua_path..dirsep..'*.lua')
 load_script_list(script_list,lua_path)
 local dirs = extman.Directories(lua_path,'^_')
 for _,dir in ipairs(dirs) do
-    load_script_list(extman.Files(dir..dirsep..'*.lua'),dir)
+  load_script_list(extman.Files(dir..dirsep..'*.lua'),dir)
 end
 
 function extman.WordAtPos(pos)
-    if not pos then pos = editor.CurrentPos end
-    local p2 = editor:WordEndPosition(pos,true)
-    local p1 = editor:WordStartPosition(pos,true)
-    if p2 > p1 then
-        return editor:textrange(p1,p2)
-    end
+  if not pos then pos = editor.CurrentPos end
+  local p2 = editor:WordEndPosition(pos,true)
+  local p1 = editor:WordStartPosition(pos,true)
+  if p2 > p1 then
+    return editor:textrange(p1,p2)
+  end
 end
 
 function extman.GetSelOrWord()
-    local s = editor:GetSelText()
-    if s == '' then
-        return extman.WordAtPos()
-    else
-        return s
-    end
+  local s = editor:GetSelText()
+  if s == '' then
+    return extman.WordAtPos()
+  else
+    return s
+  end
 end
 
 extman.Command {
@@ -708,14 +709,14 @@ extman.Command {
 }
 
 function reload_script()
-   local current_file = extman.CurrentFile()
-   print('Reloading... '..current_file)
-   loaded[current_file] = false
-   silent_dofile(current_file)
+ local current_file = extman.CurrentFile()
+ print('Reloading... '..current_file)
+ loaded[current_file] = false
+ silent_dofile(current_file)
 end
 
 function extman.slashify(s)
-    return s:gsub('\\','\\\\')
+  return s:gsub('\\','\\\\')
 end
 
 --~ require"remdebug.engine"
