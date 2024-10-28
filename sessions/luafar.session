@@ -4,9 +4,9 @@ buffer.1.path=/home/shmuel/far2m/far/far2sdk/farplug-wide.h
 buffer.1.position=62409
 buffer.1.scroll=2534
 
-buffer.2.path=/home/shmuel/far2m/far/src/macro/macro.cpp
-buffer.2.position=1829
-buffer.2.scroll=30
+buffer.2.path=/home/shmuel/far2m/far/src/main.cpp
+buffer.2.position=1
+buffer.2.scroll=0
 buffer.2.current=1
 
 buffer.3.path=/home/shmuel/far2m/luafar/src/luafar.h
