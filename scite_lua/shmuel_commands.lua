@@ -84,7 +84,7 @@ function smz_Compile()
   end
 
   local incl = FAR2M_Includes or make_far2m_includes()
-  local dir_start = "~/far2m/far"
+  local dir_start = "~/repos/far2m/far"
   local flags = "-std=c++11 -Wall -fPIC -D_FILE_OFFSET_BITS=64"
   local command = ("cd %s && g++ %s %s -c %s -o /tmp/far2m_tmp.o 2>&1"):format(
     dir_start, incl, flags, props.FilePath:match("src/.+"))
