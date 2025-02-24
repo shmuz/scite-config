@@ -6,6 +6,7 @@ extman.Command {
   {"Insert GUID",   "smz_InsertGUID", "Ctrl+F11"},
   {"Insert Date",   "smz_InsertDate", "Ctrl+Shift+T"},
   {"Compile CPP-file", "smz_Compile", "*.cpp{savebefore:yes}", "Alt+F9"},
+  {"Git Restore",   "smz_GitRestore"},
 }
 --------------------------------------------------------------------------------
 
@@ -78,17 +79,7 @@ local function make_far2m_includes()
   return FAR2M_Includes
 end
 
-function smz_Compile()
-  if nil == props.FilePath:match("/far2m/far/src/") then
-    print("OUTSIDE THE WORK TREE"); return
-  end
-
-  local incl = FAR2M_Includes or make_far2m_includes()
-  local dir_start = "~/repos/far2m/far"
-  local flags = "-std=c++11 -Wall -fPIC -D_FILE_OFFSET_BITS=64"
-  local command = ("cd %s && g++ %s %s -c %s -o /tmp/far2m_tmp.o 2>&1"):format(
-    dir_start, incl, flags, props.FilePath:match("src/.+"))
-
+local function RunShellCommand(command)
   print(">"..command)
   local fp, msg = io.popen(command)
   if fp then
@@ -102,5 +93,23 @@ function smz_Compile()
   else
     print(msg)
   end
+end
+
+function smz_Compile()
+  if nil == props.FilePath:match("/far2m/far/src/") then
+    print("OUTSIDE THE WORK TREE"); return
+  end
+
+  local incl = FAR2M_Includes or make_far2m_includes()
+  local dir_start = "~/repos/far2m/far"
+  local flags = "-std=c++11 -Wall -fPIC -D_FILE_OFFSET_BITS=64"
+  local command = ("cd %s && g++ %s %s -c %s -o /tmp/far2m_tmp.o 2>&1"):format(
+    dir_start, incl, flags, props.FilePath:match("src/.+"))
+  RunShellCommand(command)
+end
+
+function smz_GitRestore()
+  local command = ("git restore ")..props.FilePath
+  RunShellCommand(command)
 end
 --------------------------------------------------------------------------------
