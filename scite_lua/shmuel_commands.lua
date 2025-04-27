@@ -53,29 +53,31 @@ end
 
 local FAR2M_Includes
 
-local function make_far2m_includes()
-  local list = {
-    ".",
-    "../_build/far",
-    "../utils/include",
-    "../WinPort",
-    "far2sdk",
-    "src",
-    "src/base",
-    "src/bookmarks",
-    "src/cfg",
-    "src/console",
-    "src/filemask",
-    "src/hist",
-    "src/locale",
-    "src/macro",
-    "src/mix",
-    "src/panels",
-    "src/plug",
-    "src/vt",
-  }
-  for k,v in ipairs(list) do list[k] = "-I"..v; end
-  FAR2M_Includes = table.concat(list, " ")
+local function get_far2m_includes()
+  if not FAR2M_Includes then
+    local list = {
+      ".",
+      "../_build/far",
+      "../utils/include",
+      "../WinPort",
+      "far2sdk",
+      "src",
+      "src/base",
+      "src/bookmarks",
+      "src/cfg",
+      "src/console",
+      "src/filemask",
+      "src/hist",
+      "src/locale",
+      "src/macro",
+      "src/mix",
+      "src/panels",
+      "src/plug",
+      "src/vt",
+    }
+    for k,v in ipairs(list) do list[k] = "-I"..v; end
+    FAR2M_Includes = table.concat(list, " ")
+  end
   return FAR2M_Includes
 end
 
@@ -100,7 +102,7 @@ function smz_Compile()
     print("OUTSIDE THE WORK TREE"); return
   end
 
-  local incl = FAR2M_Includes or make_far2m_includes()
+  local incl = get_far2m_includes()
   local dir_start = "~/repos/far2m/far"
   local flags = "-std=c++17 -Wall -fPIC -D_FILE_OFFSET_BITS=64"
   local command = ("cd %s && g++ %s %s -c %s -o /tmp/far2m_tmp.o 2>&1"):format(
