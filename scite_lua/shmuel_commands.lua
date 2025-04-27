@@ -1,12 +1,12 @@
 -- Started 2008-11-06 by Shmuel Zeigerman
--- luacheck: globals smz_Compile  smz_InsertDate  smz_InsertGUID
+-- luacheck: globals smz_Compile smz_GitRestore smz_InsertDate smz_InsertGUID
 
 extman.Command {
-  {"Sort Lines",    "smz_SortLines",  "Ctrl+M"},
-  {"Insert GUID",   "smz_InsertGUID", "Ctrl+F11"},
-  {"Insert Date",   "smz_InsertDate", "Ctrl+Shift+T"},
-  {"Compile CPP-file", "smz_Compile", "*.cpp{savebefore:yes}", "Alt+F9"},
-  {"Git Restore",   "smz_GitRestore"},
+  { "Compile CPP-file" , "smz_Compile"    , "*.cpp{savebefore:yes}", "Alt+F9" },
+  { "Git Restore"      , "smz_GitRestore" ,                },
+  { "Insert Date"      , "smz_InsertDate" , "Ctrl+Shift+T" },
+  { "Insert GUID"      , "smz_InsertGUID" , "Ctrl+F11"     },
+  { "Sort Lines"       , "smz_SortLines"  , "Ctrl+M"       },
 }
 --------------------------------------------------------------------------------
 
