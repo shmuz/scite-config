@@ -705,7 +705,7 @@ function extman.GetSelOrWord()
 end
 
 extman.Command {
- {'Reload Script', 'reload_script', 'Shift+Ctrl+R'}
+  {'Reload Script', 'reload_script', "*.lua", 'Shift+Ctrl+R'}
 }
 
 function reload_script()
