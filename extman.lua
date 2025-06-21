@@ -257,7 +257,7 @@ end
 
 local word_start, in_word, current_word
 -- (Nicolas) this is in Ascii as SciTE always passes chars in this "encoding" to OnChar
-local wordchars = '[A-Za-zÀ-Ýà-ÿ]'  -- wuz %w
+local wordchars = '[A-Za-z\192-\221\224-\255]'  -- wuz %w
 
 local function on_word_char(s)
   if not in_word then
