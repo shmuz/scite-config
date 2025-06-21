@@ -15,15 +15,6 @@ local unpack = unpack or table.unpack
 -- On 2021-11-06 I replaced all the occurrences of "scite_(\w+)" with "extman.$1".
 extman = {}
 
--- this is an opportunity for you to make regular Lua packages available to SciTE
---do
---  local p = "s:/progr/work/lua_share"
---  package.path = ("%s/?.lua;%s/?/?.lua;%s/?/init.lua"):format(p,p,p)
---  package.cpath = "s:/progr/exe/lib32/lua/5.1/?.dll"
---end
-
--- local lfs = require "lfs"
-
 -- useful function for getting a property, or a default if not present.
 function extman.GetProp(key,default)
   local val = props[key]
@@ -46,17 +37,12 @@ local _OpenSwitch = {}
 local _UpdateUI = {}
 local _UserListSelection
 local _Strips
--- new with 1.74!
+
 local _Key = {}
 local _DwellStart = {}
 local _Close = {}
--- new
-local append = table.insert
-local find   = string.find
-local match  = string.match
-local sub    = string.sub
-local gsub   = string.gsub
 
+local find, match, sub, gsub = string.find, string.match, string.sub, string.gsub
 
 -- file must be quoted if it contains spaces!
 function extman.quote_if_needed(target)
@@ -77,7 +63,7 @@ function OnUserListSelection(tp,str)
 end
 
 function OnStrip(control, change)
-  local events = { [1]='clicked', [2]='change', [3]='focusIn', [4]='focusOut' }
+  local events = { 'clicked', 'change', 'focusIn', 'focusOut' }
   if _Strips then
     _Strips.action(control, events[change] or 'unknown', _Strips)
   end
@@ -100,7 +86,7 @@ local function Dispatch(handlers, ...)
   return ret
 end
 
--- these are the standard SciTE Lua callbacks  - we use them to call installed extman handlers!
+-- these are the standard SciTE Lua callbacks - we use them to call installed extman handlers!
 function OnMarginClick()
   return Dispatch(_MarginClick)
 end
@@ -169,7 +155,7 @@ local function append_unique(handlers,fn,param)
     if handler == fn then idx = i; break end
   end
   if idx and (param == "remove") then
-    table.remove(idx)
+    table.remove(handlers, idx)
   elseif not idx and (param ~= "remove") then
     table.insert(handlers, fn)
   end
@@ -451,7 +437,7 @@ function extman.Files(mask)
   if f then
     for line in f:lines() do
       -- print(path..line)
-      append(files,path..line)
+      table.insert(files,path..line)
     end
     f:close()
   end
@@ -482,7 +468,7 @@ function extman.Directories(path,exclude_pat)
       end
     end
     if line and not line:find(exclude_pat) and line:lower() ~= 'examples' then
-      append(files,path..line)
+      table.insert(files,path..line)
     end
   end
   f:close()
@@ -514,7 +500,7 @@ end
 
 function extman.split(s,delim)
   local res = {}
-  for w in (s..delim):gmatch("(.-)%"..delim) do append(res,w) end
+  for w in (s..delim):gmatch("(.-)%"..delim) do table.insert(res,w) end
   return res
 end
 
