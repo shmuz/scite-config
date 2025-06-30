@@ -104,7 +104,7 @@ function smz_Compile()
 
   local incl = get_far2m_includes()
   local dir_start = "~/repos/far2m/far"
-  local flags = "-std=c++17 -Wall -fPIC -D_FILE_OFFSET_BITS=64"
+  local flags = "-std=c++17 -Wall -fPIC -D_FILE_OFFSET_BITS=64 -DUNICODE"
   local command = ("cd %s && g++ %s %s -c %s -o /tmp/far2m_tmp.o 2>&1"):format(
     dir_start, incl, flags, props.FilePath:match("src/.+"))
   RunShellCommand(command)
