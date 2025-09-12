@@ -151,6 +151,15 @@ local function DoSort (arr_compare, arr_index, arr_dialog)
   table.sort(arr_index, cmp)
 end
 
+local function DoRandomSort (arr_index)
+  math.randomseed(os.time())
+  local t_rand = {}
+  for i = 1,#arr_index do
+    t_rand[i] = math.random()
+  end
+  table.sort(arr_index, function(i1, i2) return t_rand[i1] < t_rand[i2] end)
+end
+
 -- give expressions read access to the global table
 local meta = { __index=_G }
 
@@ -180,18 +189,24 @@ local function GetExpressions (aData, env)
 end
 
 -- generic
-local function SortWithRawData (aData, columntype)
-  local env = setmetatable({}, meta)
-  local arr_dialog = GetExpressions(aData, env)
-  if #arr_dialog == 0 then
-    return  -- no expressions available
-  end
+local function SortWithRawData (aData, columntype, aRandomSort)
   local arr_compare, arr_index, arr_target = GetLines(columntype)
   if #arr_compare < 2 then
     return  -- nothing to sort
   end
-  env.I = #arr_index
-  DoSort(arr_compare, arr_index, arr_dialog)
+
+  if aRandomSort then
+    DoRandomSort(arr_index)
+  else
+    local env = setmetatable({}, meta)
+    local arr_dialog = GetExpressions(aData, env)
+    if #arr_dialog == 0 then
+      return  -- no expressions available
+    end
+    env.I = #arr_index
+    DoSort(arr_compare, arr_index, arr_dialog)
+  end
+
   -- put the sorted lines into the editor
   local OnlySelection = columntype and aData.cbxOnlySel
   local EOL = GetDefaultEOL()
@@ -213,15 +228,15 @@ local DialogData = {
 function smz_SortLines()
   -- Create a strip
   local Strip = {
-    "'Expression:'",     "[]", "(&Direct Sort)",  -- 0,1,2
+    "'Expression:'",     "[]", "(&Direct Sort)", "(&Reverse Sort)", -- 0,1,2,3
     "\n",
-    "'Column Pattern:'", "[]", "(&Reverse Sort)", -- 3,4,5
+    "'Column Pattern:'", "[]", "(Randomi&ze)",   "(&Cancel)", -- 4,5,6,7
     "\n",
-    "'Only selected:'",  "{}", "(&Cancel)",       -- 6,7,8
+    "'Only selected:'",  "{}", -- 8,9
   }
-  local edtExpr1,   btnDirect  = 1,2
-  local edtColPat,  btnReverse = 4,5
-  local cbxOnlySel, btnCancel  = 7,8
+  local edtExpr1, btnDirect, btnReverse = 1,2,3
+  local edtColPat, btnRandomize, btnCancel = 5,6,7
+  local cbxOnlySel = 9
 
   scite.StripShow(table.concat(Strip))
   scite.StripSet(edtExpr1, DialogData.edtExpr1)
@@ -239,7 +254,7 @@ function smz_SortLines()
           DialogData.edtColPat  = scite.StripValue(edtColPat)
           DialogData.cbxRev1    = (control == btnReverse)
           DialogData.cbxOnlySel = (scite.StripValue(cbxOnlySel) == "Yes")
-          SortWithRawData (DialogData, IsColumnType())
+          SortWithRawData (DialogData, IsColumnType(), control == btnRandomize)
         end
       end
     end;
