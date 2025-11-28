@@ -1,12 +1,14 @@
 -- Started 2008-11-06 by Shmuel Zeigerman
--- luacheck: globals smz_Compile smz_GitRestore smz_InsertDate smz_InsertGUID
+-- luacheck: globals    smz_Compile     smz_GitRestore
+-- luacheck: globals    smz_InsertDate  smz_InsertGUID  smz_ShowGitDiff
 
 extman.Command {
   { "Compile CPP-file" , "smz_Compile"    , "*.cpp{savebefore:yes}", "Alt+F9" },
+  { "Launch Diff Tool" , "smz_ShowGitDiff" ,               },
   { "Git Restore"      , "smz_GitRestore" ,                },
   { "Insert Date"      , "smz_InsertDate" , "Ctrl+Shift+T" },
   { "Insert GUID"      , "smz_InsertGUID" , "Ctrl+F11"     },
-  { "Sort Lines"       , "smz_SortLines"  , "Ctrl+M"       },
+  { "Sort Lines"       , "smz_SortLines"  , "Ctrl+M"       }, -- located in a separate file
 }
 --------------------------------------------------------------------------------
 
@@ -80,6 +82,7 @@ local function get_far2m_includes()
   end
   return FAR2M_Includes
 end
+--------------------------------------------------------------------------------
 
 local function RunShellCommand(command)
   print(">"..command)
@@ -96,6 +99,7 @@ local function RunShellCommand(command)
     print(msg)
   end
 end
+--------------------------------------------------------------------------------
 
 function smz_Compile()
   if nil == props.FilePath:match("/far2m/far/src/") then
@@ -109,9 +113,22 @@ function smz_Compile()
     dir_start, incl, flags, props.FilePath:match("src/.+"))
   RunShellCommand(command)
 end
+--------------------------------------------------------------------------------
 
 function smz_GitRestore()
   local command = ("git restore ")..props.FilePath
   RunShellCommand(command)
+end
+--------------------------------------------------------------------------------
+
+function smz_ShowGitDiff()
+  local tmpdir = (os.getenv("TMPDIR") or "/tmp") .. "/scite-diffs"
+  local rel_path = props.FilePath:gsub(".*/repos/[^/]+/", "")
+  local head_path = tmpdir.."/".. props.FileNameExt
+  local gitshow = ("git show HEAD:%s > %s"):format(rel_path, head_path)
+
+  os.execute("mkdir " .. tmpdir)
+  os.execute(gitshow)
+  os.execute(("meld %q %q &"):format(head_path, props.FilePath))
 end
 --------------------------------------------------------------------------------
