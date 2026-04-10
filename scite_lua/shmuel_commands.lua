@@ -116,7 +116,7 @@ end
 --------------------------------------------------------------------------------
 
 function smz_GitRestore()
-  local command = ("git restore ")..props.FilePath
+  local command = ("git restore \"%s\""):format(props.FilePath)
   RunShellCommand(command)
 end
 --------------------------------------------------------------------------------
@@ -125,7 +125,7 @@ function smz_ShowGitDiff()
   local tmpdir = (os.getenv("TMPDIR") or "/tmp") .. "/scite-diffs"
   local rel_path = props.FilePath:gsub(".*/repos/[^/]+/", "")
   local head_path = tmpdir.."/".. props.FileNameExt
-  local gitshow = ("git show HEAD:%s > %s"):format(rel_path, head_path)
+  local gitshow = ("git show \"HEAD:%s\" > %s"):format(rel_path, head_path)
 
   os.execute("mkdir " .. tmpdir)
   os.execute(gitshow)
