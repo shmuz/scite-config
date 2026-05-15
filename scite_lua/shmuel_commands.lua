@@ -101,6 +101,13 @@ local function RunShellCommand(command)
 end
 --------------------------------------------------------------------------------
 
+local function get_musl_flag()
+  local fp = io.popen("ldd --version 2>&1")
+  local ver = fp:read("*all")
+  fp:close()
+  return ver:match("musl") and " -D__MUSL__" or ""
+end
+
 function smz_Compile()
   if nil == props.FilePath:match("/far2m/far/src/") then
     print("OUTSIDE THE WORK TREE"); return
@@ -108,7 +115,7 @@ function smz_Compile()
 
   local incl = get_far2m_includes()
   local dir_start = "~/repos/far2m/far"
-  local flags = "-std=c++17 -Wall -fPIC -D_FILE_OFFSET_BITS=64 -DUNICODE"
+  local flags = "-std=c++17 -Wall -fPIC -D_FILE_OFFSET_BITS=64 -DUNICODE" .. get_musl_flag()
   local command = ("cd %s && g++ %s %s -c %s -o /tmp/far2m_tmp.o 2>&1"):format(
     dir_start, incl, flags, props.FilePath:match("src/.+"))
   RunShellCommand(command)
