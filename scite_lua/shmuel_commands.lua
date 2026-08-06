@@ -4,7 +4,7 @@
 
 extman.Command {
   { "Compile CPP-file" , "smz_Compile"    , "*.cpp{savebefore:yes}", "Alt+F9" },
-  { "Launch Diff Tool" , "smz_ShowGitDiff" ,               },
+  { "Launch Diff Tool" , "smz_ShowGitDiff", "Ctrl+Shift+F2"},
   { "Git Restore"      , "smz_GitRestore" ,                },
   { "Insert Date"      , "smz_InsertDate" , "Ctrl+Shift+T" },
   { "Insert GUID"      , "smz_InsertGUID" , "Ctrl+F11"     },
