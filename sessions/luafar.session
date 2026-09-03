@@ -25,7 +25,7 @@ buffer.6.path=/home/shmuel/repos/far2m/luafar/src/lf_farhost.cpp
 buffer.6.position=1
 buffer.6.scroll=0
 
-buffer.7.path=/home/shmuel/repos/far2m/luamacro/src/luamacro.lua
+buffer.7.path=/home/shmuel/repos/far2m/plugins/luamacro/src/luamacro.lua
 buffer.7.position=11037
 buffer.7.scroll=360
 
